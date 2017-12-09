@@ -24,6 +24,18 @@
 #include "registro.h"
 #include "registroDia.h"
 
+#define VERDADEIRO 0
+#define FALSO 1 
+#define INCONSISTENTE 2
+#define PARA_COMPLETO 3
+#define QUASE_VERDADEIRO_TD_INCONSISTENTE 4
+#define INCONSISTENTE_TD_VERDADEIRO 5
+#define QUASE_VERDADEIRO_TD_PARACOMPLETO 6
+#define PARACOMPLETO_TD_VERDADEIRO 7
+#define QUASE_FALSO_TD_PARACOMPLETO 8
+#define PARACOMPLETO_TD_FALSO 9
+#define QUASE_FALSO_TD_INCONSISTENTE 10
+#define INCONSISTENTE_TD_FALSO 11
 
 
 using namespace std;
@@ -42,8 +54,22 @@ void *monitorarE1(void *ptr) {
     float c1 = 0.5, c2 = -0.5;
     float c3 = .5, c4 = -0.5, m[2], l[2], gct, gc;
     int s1, s2a, s2b;
-    int V = 0, F = 1, T = 2, P = 3;
-    std::string res[4] = {"VERDADEIRO", "FALSO", "INCONSISTENTE", "PARA COMPLETO"};
+    int V = 0, F = 1, T = 2, P = 3, qvT = 4, tV = 5, qvP = 6, pV = 7, qfP = 8, pF = 9, qfT = 10, tF = 11;
+    std::string res[13];
+
+    res[VERDADEIRO] = "VERDADEIRO";
+    res[FALSO] = "FALSO";
+    res[INCONSISTENTE] = "INCONSISTENTE";
+    res[PARA_COMPLETO] = "PARACOMPLETO";
+    res[QUASE_VERDADEIRO_TD_INCONSISTENTE] = "QUASE VERDADEIRO TENDENDO AO INCONSISTENTE";
+    res[INCONSISTENTE_TD_VERDADEIRO] = "INCONSISTENTE TENDENDO AO VERDADEIRO";
+    res[QUASE_VERDADEIRO_TD_PARACOMPLETO] = "QUASE VERDADEIRO TENDENDO AO PARACOMPLETO";
+    res[PARACOMPLETO_TD_VERDADEIRO] = "PARACOMPLETO TENDENDO AO VERDADEIRO";
+    res[QUASE_FALSO_TD_PARACOMPLETO] = "QUASE FALSO TENDENDO AO PARACOMPLETO";
+    res[PARACOMPLETO_TD_FALSO] = "PARACOMPLETO TENDENDO AO FALSO";
+    res[QUASE_FALSO_TD_INCONSISTENTE] = "QUASE FALSO TENDENDO AO INCONSISTENTE";
+    res[INCONSISTENTE_TD_FALSO] = "INCONSISTENTE TENDENDO AO FALSO";
+    res[12] = "???????????????????????????";
 
     do {
         ifstream arquivo("momento.txt", std::ifstream::in);
@@ -64,17 +90,17 @@ void *monitorarE1(void *ptr) {
                 str2 >> hr;
                 str3 >> dld;
                 str4 >> upl;
-
+                s1=12;
                 //calculo nova media do mes com base em novas entradas
                 qtDiasMes[diaM - 1]++;
                 float novoDesvMedia = (dld - mediasDiaMes[diaM - 1].GetDownload()) / qtDiasMes[diaM - 1];
                 mediasDiaMes[diaM - 1].SetDownload(mediasDiaMes[diaM - 1].GetDownload() + novoDesvMedia);
-                
+
                 //calculo nova media da semana com base em novas entradas
                 qtDiasSem[diaS - 1]++;
                 novoDesvMedia = (dld - mediasDiaSemana[diaS - 1].GetDownload()) / qtDiasSem[diaS - 1];
                 mediasDiaSemana[diaS - 1].SetDownload(mediasDiaSemana[diaM - 1].GetDownload() + novoDesvMedia);
-                
+
                 //mediasDiaMes
 
                 difDldD = mediasDiaMes[diaM - 1].GetDownload() - dld;
@@ -107,7 +133,7 @@ void *monitorarE1(void *ptr) {
                 m[1] = m[1] < 0 ? 1 : 1 - m[1]; //se m < 0 significa que download atual supera 100% da média esperada
                 cout << "mediaSemana: " << mediasDiaSemana[diaS].GetDownload() << " dld: " << dld << endl;
                 cout << "m do Mes: " << m[0] << " m da Semana: " << m[1] << endl;
-                
+
                 //verifica se está ocorrendo ataque considerando a hipótese otimista em relação ao download
                 m[0] = m[0] > m[1] ? m[1] : m[0];
                 cout << "M: " << m[0] << endl;
@@ -124,8 +150,8 @@ void *monitorarE1(void *ptr) {
                 //Analise de UPLOAD conforme dia da semana
                 difer = abs(mediasDiaSemana[diaS].GetUpload() - upl);
                 l[1] = (mediasDiaSemana[diaS].GetUpload() - difer) / mediasDiaSemana[diaS].GetUpload();
-                
-                //verifica se está ocorrendo ataque considerando a hipótese otimista em relação ao upload
+
+                //verifica se NÃO está ocorrendo ataque considerando a hipótese otimista em relação ao upload
                 l[1] = l[1] < 0 ? 0 : 1 - l[1]; //se m < 0 significa que upload atual supera 100% da média esperada
                 cout << "mediaSemana: " << mediasDiaSemana[diaS].GetUpload() << " upl: " << upl << endl;
 
@@ -134,31 +160,68 @@ void *monitorarE1(void *ptr) {
                 cout << "L: " << l[0] << endl;
                 l[0] = l[0];
                 l[0] = 1 - l[0];
-               
+
                 //Aplicação do Algoritmo "PARA-ANALISADOR"
                 gct = m[0] + l[0] - 1.0;
                 gc = m[0] - l[0];
 
                 cout << gc << "|" << gct << endl;
 
-                if (gc >= c1) {
+                if (gc >= c1) {//c1: limite superior de certeza
                     s1 = V;
                 }
-                if (gc <= c2) {
+                if (gc <= c2) {//c2: limite inferior de certeza
                     s1 = F;
                 }
-                if (gct >= c3) {
+                if (gct >= c3) {//c3: limite superior de contradição
                     s1 = T;
                 }
-                if (gct <= c4) {
+                if (gct <= c4) {//c4: limite inferior de contradição
                     s1 = P;
                 }
+                cout << "Resultado lógico extremo: " << res[s1] << endl;
 
-                cout << "Resultado: " << res[s1] << endl;
+                if ((0 <= gc && gc < c1)&&(0 <= gct && gct < c3)) {
+                    if (gc >= gct) {
+                        s1 = QUASE_VERDADEIRO_TD_INCONSISTENTE;
+                    }
+                    if (gc < gct) {
+                        s1 = INCONSISTENTE_TD_VERDADEIRO;
+                    }
+                }
+                if ((0 <= gc && gc < c1)&&(c4 < gct && gct <= 0)) {
+                    if (gc >= abs(gct)) {
+                        s1 = QUASE_VERDADEIRO_TD_PARACOMPLETO;
+                    }
+                    if (gc < abs(gct)) {
+                        s1 = PARACOMPLETO_TD_VERDADEIRO;
+                    }
+                }
+                if ((c2 < gc && gc <= 0)&&(c4 < gct && gct <= 0)) {
+                    if (abs(gc) >= abs(gct)) {
+                        s1 = QUASE_FALSO_TD_PARACOMPLETO;
+                    }
+
+                    if (abs(gc) < abs(gct)) {
+                        s1 = PARACOMPLETO_TD_FALSO;
+                    }
+                }
+                if ((c2 < gc && gc <= 0)&&(0 <= gct && gct < c3)) {
+                    if (abs(gc) >= gct) {
+                        s1 = QUASE_FALSO_TD_INCONSISTENTE;
+                    }
+
+                    if (abs(gc) < gct) {
+                        s1 = INCONSISTENTE_TD_FALSO;
+                    }
+                }
+
+
+                cout << "Resultado lógico não extremo: " << res[s1] << endl;
 
 
                 //
-                usleep(1200000);
+                usleep(120000);
             }
             arquivo.close();
         }
@@ -221,7 +284,7 @@ int main(int argc, char** argv) {
         str4 >> upl;
 
         // cout << dl << endl;
-        Registro *r = new Registro(ddm, dds, hr, dl, upl);
+        Registro * r = new Registro(ddm, dds, hr, dl, upl);
         registros.push_back(*r);
         k++;
     }
@@ -265,7 +328,7 @@ int main(int argc, char** argv) {
     for (int i = 0; i < 30; i++) {
         cout << diasMesD[i] << endl;
         diasMesD[i] = (float) diasMesD[i] / (float) qtDiasMes[i];
-        diasMesU[i] = (float) diasMesU[i] / (float)qtDiasMes[i];
+        diasMesU[i] = (float) diasMesU[i] / (float) qtDiasMes[i];
     }
 
 
