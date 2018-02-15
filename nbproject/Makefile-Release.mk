@@ -37,7 +37,8 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 OBJECTFILES= \
 	${OBJECTDIR}/main.o \
 	${OBJECTDIR}/registro.o \
-	${OBJECTDIR}/registroDia.o
+	${OBJECTDIR}/registroDia.o \
+	${OBJECTDIR}/registroNovo.o
 
 
 # C Compiler Flags
@@ -78,6 +79,11 @@ ${OBJECTDIR}/registroDia.o: registroDia.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/registroDia.o registroDia.cpp
+
+${OBJECTDIR}/registroNovo.o: registroNovo.cpp
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/registroNovo.o registroNovo.cpp
 
 # Subprojects
 .build-subprojects:

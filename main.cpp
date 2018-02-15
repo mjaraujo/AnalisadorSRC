@@ -18,7 +18,7 @@
 #include <sstream>
 #include <fstream>
 #include <unistd.h>
-#include <complex>
+#include <cmath>
 
 #include "pthread.h"
 #include "registro.h"
@@ -69,7 +69,7 @@ void *monitorarE1(void *ptr) {
     res[PARACOMPLETO_TD_FALSO] = "PARACOMPLETO TENDENDO AO FALSO";
     res[QUASE_FALSO_TD_INCONSISTENTE] = "QUASE FALSO TENDENDO AO INCONSISTENTE";
     res[INCONSISTENTE_TD_FALSO] = "INCONSISTENTE TENDENDO AO FALSO";
-    res[12] = "???????????????????????????";
+    res[12] = "RESULTADO INEXISTENTE";
 
     do {
         ifstream arquivo("momento.txt", std::ifstream::in);
@@ -221,7 +221,7 @@ void *monitorarE1(void *ptr) {
 
 
                 //
-                usleep(120000);
+                usleep(1200000);
             }
             arquivo.close();
         }
@@ -353,7 +353,6 @@ int main(int argc, char** argv) {
 
     pthread_t thread1;
     char *message1 = "Thread 1";
-    std::string message2 = "Thread 2";
     int iret1 = pthread_create(&thread1, NULL, monitorarE1, (void*) message1);
 
     pthread_join(thread1, NULL);
